@@ -1,0 +1,50 @@
+.o_kol_dashboard {
+    padding: 16px 24px 32px;
+    background: #f6f7fb;
+    height: 100%;
+    overflow: auto;
+
+    .o_kol_header {
+        margin-bottom: 16px;
+        h1 { font-size: 22px; font-weight: 600; margin: 0; color: #111827; }
+        .o_kol_sub { color: #6b7280; font-size: 13px; }
+    }
+
+    .o_kol_kpis {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+        @media (max-width: 1200px) { grid-template-columns: repeat(3, 1fr); }
+        @media (max-width: 700px) { grid-template-columns: repeat(2, 1fr); }
+    }
+    .o_kpi {
+        background: #fff;
+        border-radius: 12px;
+        padding: 14px 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+        .o_kpi_label { color: #6b7280; font-size: 12px; margin-bottom: 6px; }
+        .o_kpi_value { font-size: 20px; font-weight: 700; color: #111827; line-height: 1.2; }
+    }
+    .o_kpi_primary {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        .o_kpi_label, .o_kpi_value { color: #fff; }
+    }
+    .o_kpi_warn .o_kpi_value { color: #d97706; }
+
+    .o_kol_charts {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 16px;
+        @media (max-width: 900px) { grid-template-columns: 1fr; }
+    }
+    .o_kol_card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+        h3 { font-size: 14px; font-weight: 600; margin: 0 0 12px; color: #374151; }
+    }
+    .o_kol_card_full { grid-column: 1 / -1; }
+    .o_kol_canvas_wrap { position: relative; height: 280px; }
+}

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============ kol.order form: nút Xác nhận → tạo đơn Odoo ============ -->
+    <record id="view_kol_order_form_oms" model="ir.ui.view">
+        <field name="name">kol.order.form.oms</field>
+        <field name="model">kol.order</field>
+        <field name="inherit_id" ref="view_kol_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_confirm_to_sale" type="object"
+                        string="Xác nhận &amp; tạo đơn Odoo" class="btn-primary"
+                        invisible="oms_state == 'confirmed'"/>
+                <field name="oms_state" widget="statusbar"/>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_title')]" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_view_sale_order" type="object"
+                            class="oe_stat_button" icon="fa-file-text-o"
+                            invisible="not sale_order_id">
+                        <div class="o_stat_info">
+                            <span class="o_stat_text">Đơn Odoo</span>
+                        </div>
+                    </button>
+                    <button name="action_view_pickings" type="object"
+                            class="oe_stat_button" icon="fa-truck"
+                            invisible="picking_count == 0">
+                        <field name="picking_count" widget="statinfo" string="Phiếu giao"/>
+                    </button>
+                </div>
+                <field name="sale_order_id" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ============ kol.order list: cột Xử lý đơn ============ -->
+    <record id="view_kol_order_list_oms" model="ir.ui.view">
+        <field name="name">kol.order.list.oms</field>
+        <field name="model">kol.order</field>
+        <field name="inherit_id" ref="view_kol_order_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="oms_state" widget="badge"
+                       decoration-info="oms_state == 'received'"
+                       decoration-success="oms_state == 'confirmed'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ============ kol.order search: lọc theo xử lý đơn ============ -->
+    <record id="view_kol_order_search_oms" model="ir.ui.view">
+        <field name="name">kol.order.search.oms</field>
+        <field name="model">kol.order</field>
+        <field name="inherit_id" ref="view_kol_order_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='f_cancel_return']" position="after">
+                <separator/>
+                <filter name="f_oms_received" string="Mới nhận (chưa tạo đơn)"
+                        domain="[('oms_state','=','received')]"/>
+                <filter name="f_oms_confirmed" string="Đã tạo đơn Odoo"
+                        domain="[('oms_state','=','confirmed')]"/>
+            </xpath>
+            <xpath expr="//filter[@name='gb_state']" position="after">
+                <filter name="gb_oms" string="Xử lý đơn (OMS)"
+                        context="{'group_by':'oms_state'}"/>
+            </xpath>
+            <xpath expr="//searchpanel/field[@name='state']" position="after">
+                <field name="oms_state" select="multi" icon="fa-truck" enable_counters="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ============ sale.order form: trang Nguồn sàn (Sellmate) ============ -->
+    <record id="view_order_form_oms" model="ir.ui.view">
+        <field name="name">sale.order.form.oms</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Nguồn sàn (Sellmate)" invisible="not marketplace_platform">
+                    <group>
+                        <group string="Sàn TMĐT">
+                            <field name="marketplace_platform"/>
+                            <field name="marketplace_shop_id"/>
+                            <field name="marketplace_order_ref"/>
+                            <field name="kol_order_id"/>
+                            <field name="carrier_id"/>
+                        </group>
+                        <group string="KOL / Chiến dịch">
+                            <field name="kol_account_id"/>
+                            <field name="kol_influencer_id"/>
+                            <field name="kol_campaign_id"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ============ Đơn Odoo tạo từ sàn (xem trong app KOL) ============ -->
+    <record id="action_kol_sale_order" model="ir.actions.act_window">
+        <field name="name">Đơn Odoo (từ sàn)</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('kol_order_id','!=',False)]</field>
+    </record>
+
+    <menuitem id="menu_kol_sale_order" name="Đơn Odoo (giao hàng)"
+              parent="menu_kol_data" action="action_kol_sale_order" sequence="15"
+              groups="bsd_kol_report.group_kol_manager"/>
+
+    <!-- ============ Nhà cung cấp vận chuyển (ĐVVC) ============ -->
+    <record id="view_mp_carrier_list" model="ir.ui.view">
+        <field name="name">delivery.carrier.list.mp</field>
+        <field name="model">delivery.carrier</field>
+        <field name="arch" type="xml">
+            <list string="Nhà cung cấp vận chuyển">
+                <field name="name"/>
+                <field name="marketplace_platform"/>
+                <field name="delivery_type"/>
+                <field name="fixed_price"/>
+                <field name="active" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_mp_carrier_form" model="ir.ui.view">
+        <field name="name">delivery.carrier.form.mp</field>
+        <field name="model">delivery.carrier</field>
+        <field name="arch" type="xml">
+            <form string="Nhà cung cấp vận chuyển">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Tên ĐVVC"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="marketplace_platform"/>
+                            <field name="delivery_type"/>
+                        </group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="fixed_price"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_mp_carrier" model="ir.actions.act_window">
+        <field name="name">Nhà cung cấp vận chuyển</field>
+        <field name="res_model">delivery.carrier</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_mp_carrier_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_mp_carrier_form')})]"/>
+    </record>
+
+    <menuitem id="menu_mp_carrier" name="Nhà cung cấp vận chuyển"
+              parent="menu_kol_config" action="action_mp_carrier" sequence="20"
+              groups="bsd_kol_report.group_kol_manager"/>
+
+</odoo>

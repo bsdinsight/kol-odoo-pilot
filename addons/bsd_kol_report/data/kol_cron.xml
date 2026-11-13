@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="cron_kol_sync" model="ir.cron">
+        <field name="name">KOL Report: Đồng bộ dữ liệu sàn</field>
+        <field name="model_id" ref="model_kol_connection"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_sync_all()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="nextcall">2026-10-19 02:00:00</field>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>

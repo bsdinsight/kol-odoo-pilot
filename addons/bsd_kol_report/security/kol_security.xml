@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="group_kol_viewer" model="res.groups">
+        <field name="name">KOL Report: Chỉ xem</field>
+    </record>
+
+    <record id="group_kol_manager" model="res.groups">
+        <field name="name">KOL Report: Quản trị</field>
+        <field name="implied_ids" eval="[(4, ref('group_kol_viewer'))]"/>
+    </record>
+
+    <!-- Mọi nhân viên nội bộ đều xem được báo cáo (chỉ đọc) -->
+    <record id="base.group_user" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('group_kol_viewer'))]"/>
+    </record>
+
+    <!-- Admin hệ thống = quyền quản trị KOL (ghi/sửa cấu hình, dữ liệu) -->
+    <record id="base.group_system" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('group_kol_manager'))]"/>
+    </record>
+
+</odoo>

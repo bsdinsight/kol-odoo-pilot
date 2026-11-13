@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="bsd_kol_report.KolDashboard">
+        <div class="o_kol_dashboard">
+            <div class="o_kol_header">
+                <h1>Tổng quan hiệu quả KOL</h1>
+                <span class="o_kol_sub">Gộp 3 sàn: Shopee · TikTok Shop · Lazada — dữ liệu mẫu</span>
+            </div>
+
+            <div class="o_kol_kpis">
+                <div class="o_kpi o_kpi_primary">
+                    <div class="o_kpi_label">Doanh số sau huỷ/hoàn</div>
+                    <div class="o_kpi_value"><t t-esc="fmtVnd(state.kpi.net)"/></div>
+                </div>
+                <div class="o_kpi">
+                    <div class="o_kpi_label">Doanh số phát sinh</div>
+                    <div class="o_kpi_value"><t t-esc="fmtVnd(state.kpi.gross)"/></div>
+                </div>
+                <div class="o_kpi">
+                    <div class="o_kpi_label">Số đơn</div>
+                    <div class="o_kpi_value"><t t-esc="state.kpi.orders.toLocaleString('vi-VN')"/></div>
+                </div>
+                <div class="o_kpi">
+                    <div class="o_kpi_label">Hoa hồng</div>
+                    <div class="o_kpi_value"><t t-esc="fmtVnd(state.kpi.commission)"/></div>
+                </div>
+                <div class="o_kpi">
+                    <div class="o_kpi_label">Số KOL</div>
+                    <div class="o_kpi_value"><t t-esc="state.kpi.kols"/></div>
+                </div>
+                <div class="o_kpi o_kpi_warn">
+                    <div class="o_kpi_label">Đơn chưa gắn KOL</div>
+                    <div class="o_kpi_value"><t t-esc="state.kpi.unattributed"/></div>
+                </div>
+            </div>
+
+            <div class="o_kol_charts">
+                <div class="o_kol_card">
+                    <h3>Doanh số theo sàn</h3>
+                    <div class="o_kol_canvas_wrap"><canvas t-ref="platformChart"/></div>
+                </div>
+                <div class="o_kol_card">
+                    <h3>Top 10 KOL theo doanh số</h3>
+                    <div class="o_kol_canvas_wrap"><canvas t-ref="kolChart"/></div>
+                </div>
+                <div class="o_kol_card o_kol_card_full">
+                    <h3>So sánh theo tháng (cột chồng theo sàn)</h3>
+                    <div class="o_kol_canvas_wrap"><canvas t-ref="monthChart"/></div>
+                </div>
+                <div class="o_kol_card o_kol_card_full">
+                    <h3>Doanh số theo chiến dịch</h3>
+                    <div class="o_kol_canvas_wrap"><canvas t-ref="campaignChart"/></div>
+                </div>
+                <div class="o_kol_card">
+                    <h3>So sánh theo quý (theo sàn)</h3>
+                    <div class="o_kol_canvas_wrap"><canvas t-ref="quarterChart"/></div>
+                </div>
+                <div class="o_kol_card">
+                    <h3>Doanh số theo thời gian</h3>
+                    <div class="o_kol_canvas_wrap"><canvas t-ref="trendChart"/></div>
+                </div>
+            </div>
+
+            <div class="o_kol_header" style="margin-top: 4px;">
+                <h1>Quảng cáo trả phí (Ads) &amp; ROAS</h1>
+                <span class="o_kol_sub">Chi phí · doanh thu · ROAS theo sàn (3 sàn) — dữ liệu mẫu</span>
+            </div>
+
+            <div class="o_kol_kpis">
+                <div class="o_kpi o_kpi_primary">
+                    <div class="o_kpi_label">ROAS tổng</div>
+                    <div class="o_kpi_value"><t t-esc="(state.kpi.roas || 0).toFixed(2)"/>x</div>
+                </div>
+                <div class="o_kpi">
+                    <div class="o_kpi_label">Chi phí quảng cáo</div>
+                    <div class="o_kpi_value"><t t-esc="fmtVnd(state.kpi.adCost)"/></div>
+                </div>
+                <div class="o_kpi">
+                    <div class="o_kpi_label">Doanh thu từ quảng cáo</div>
+                    <div class="o_kpi_value"><t t-esc="fmtVnd(state.kpi.adRevenue)"/></div>
+                </div>
+            </div>
+
+            <div class="o_kol_charts">
+                <div class="o_kol_card">
+                    <h3>ROAS theo sàn</h3>
+                    <div class="o_kol_canvas_wrap"><canvas t-ref="roasChart"/></div>
+                </div>
+                <div class="o_kol_card">
+                    <h3>Chi phí vs Doanh thu QC theo tháng</h3>
+                    <div class="o_kol_canvas_wrap"><canvas t-ref="adsTrendChart"/></div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

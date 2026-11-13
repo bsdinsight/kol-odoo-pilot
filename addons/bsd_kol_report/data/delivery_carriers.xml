@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- Sản phẩm dịch vụ đại diện cước giao hàng (demo: phí = 0, sàn thu của người mua) -->
+    <record id="product_delivery_mp" model="product.product">
+        <field name="name">Giao hàng (sàn TMĐT)</field>
+        <field name="type">service</field>
+        <field name="list_price">0.0</field>
+        <field name="sale_ok" eval="False"/>
+        <field name="purchase_ok" eval="False"/>
+    </record>
+
+    <!-- ===== ĐVVC riêng của từng sàn ===== -->
+    <record id="carrier_spx" model="delivery.carrier">
+        <field name="name">SPX Express (Shopee)</field>
+        <field name="delivery_type">fixed</field>
+        <field name="product_id" ref="product_delivery_mp"/>
+        <field name="marketplace_platform">shopee</field>
+    </record>
+
+    <record id="carrier_tiktok_logistics" model="delivery.carrier">
+        <field name="name">TikTok Shop Logistics</field>
+        <field name="delivery_type">fixed</field>
+        <field name="product_id" ref="product_delivery_mp"/>
+        <field name="marketplace_platform">tiktok</field>
+    </record>
+
+    <record id="carrier_lex" model="delivery.carrier">
+        <field name="name">Lazada Logistics (LEX)</field>
+        <field name="delivery_type">fixed</field>
+        <field name="product_id" ref="product_delivery_mp"/>
+        <field name="marketplace_platform">lazada</field>
+    </record>
+
+    <!-- ===== 3PL dùng chung (không gắn sàn) ===== -->
+    <record id="carrier_ghn" model="delivery.carrier">
+        <field name="name">Giao Hàng Nhanh (GHN)</field>
+        <field name="delivery_type">fixed</field>
+        <field name="product_id" ref="product_delivery_mp"/>
+    </record>
+
+    <record id="carrier_ghtk" model="delivery.carrier">
+        <field name="name">Giao Hàng Tiết Kiệm (GHTK)</field>
+        <field name="delivery_type">fixed</field>
+        <field name="product_id" ref="product_delivery_mp"/>
+    </record>
+
+    <record id="carrier_jt" model="delivery.carrier">
+        <field name="name">J&amp;T Express</field>
+        <field name="delivery_type">fixed</field>
+        <field name="product_id" ref="product_delivery_mp"/>
+    </record>
+
+    <record id="carrier_vtp" model="delivery.carrier">
+        <field name="name">Viettel Post</field>
+        <field name="delivery_type">fixed</field>
+        <field name="product_id" ref="product_delivery_mp"/>
+    </record>
+
+    <record id="carrier_ninjavan" model="delivery.carrier">
+        <field name="name">Ninja Van</field>
+        <field name="delivery_type">fixed</field>
+        <field name="product_id" ref="product_delivery_mp"/>
+    </record>
+
+</odoo>

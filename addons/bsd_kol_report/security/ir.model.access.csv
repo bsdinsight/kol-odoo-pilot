@@ -1,0 +1,25 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_kol_shop_viewer,kol.shop viewer,model_kol_shop,bsd_kol_report.group_kol_viewer,1,0,0,0
+access_kol_shop_manager,kol.shop manager,model_kol_shop,bsd_kol_report.group_kol_manager,1,1,1,1
+access_kol_influencer_viewer,kol.influencer viewer,model_kol_influencer,bsd_kol_report.group_kol_viewer,1,0,0,0
+access_kol_influencer_manager,kol.influencer manager,model_kol_influencer,bsd_kol_report.group_kol_manager,1,1,1,1
+access_kol_account_viewer,kol.account viewer,model_kol_account,bsd_kol_report.group_kol_viewer,1,0,0,0
+access_kol_account_manager,kol.account manager,model_kol_account,bsd_kol_report.group_kol_manager,1,1,1,1
+access_kol_product_viewer,kol.product viewer,model_kol_product,bsd_kol_report.group_kol_viewer,1,0,0,0
+access_kol_product_manager,kol.product manager,model_kol_product,bsd_kol_report.group_kol_manager,1,1,1,1
+access_kol_order_viewer,kol.order viewer,model_kol_order,bsd_kol_report.group_kol_viewer,1,0,0,0
+access_kol_order_manager,kol.order manager,model_kol_order,bsd_kol_report.group_kol_manager,1,1,1,1
+access_kol_order_line_viewer,kol.order.line viewer,model_kol_order_line,bsd_kol_report.group_kol_viewer,1,0,0,0
+access_kol_order_line_manager,kol.order.line manager,model_kol_order_line,bsd_kol_report.group_kol_manager,1,1,1,1
+access_kol_sync_status_viewer,kol.sync.status viewer,model_kol_sync_status,bsd_kol_report.group_kol_viewer,1,0,0,0
+access_kol_sync_status_manager,kol.sync.status manager,model_kol_sync_status,bsd_kol_report.group_kol_manager,1,1,1,1
+access_kol_connection_viewer,kol.connection viewer,model_kol_connection,bsd_kol_report.group_kol_viewer,1,0,0,0
+access_kol_connection_manager,kol.connection manager,model_kol_connection,bsd_kol_report.group_kol_manager,1,1,1,1
+access_kol_campaign_viewer,kol.campaign viewer,model_kol_campaign,bsd_kol_report.group_kol_viewer,1,0,0,0
+access_kol_campaign_manager,kol.campaign manager,model_kol_campaign,bsd_kol_report.group_kol_manager,1,1,1,1
+access_kol_ad_viewer,kol.ad viewer,model_kol_ad,bsd_kol_report.group_kol_viewer,1,0,0,0
+access_kol_ad_manager,kol.ad manager,model_kol_ad,bsd_kol_report.group_kol_manager,1,1,1,1
+access_kol_payout_viewer,kol.payout viewer,model_kol_payout,bsd_kol_report.group_kol_viewer,1,0,0,0
+access_kol_payout_manager,kol.payout manager,model_kol_payout,bsd_kol_report.group_kol_manager,1,1,1,1
+access_kol_payout_line_viewer,kol.payout.line viewer,model_kol_payout_line,bsd_kol_report.group_kol_viewer,1,0,0,0
+access_kol_payout_line_manager,kol.payout.line manager,model_kol_payout_line,bsd_kol_report.group_kol_manager,1,1,1,1

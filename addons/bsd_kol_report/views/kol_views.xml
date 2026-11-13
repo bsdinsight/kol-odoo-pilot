@@ -1,0 +1,631 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============ kol.order: search ============ -->
+    <record id="view_kol_order_search" model="ir.ui.view">
+        <field name="name">kol.order.search</field>
+        <field name="model">kol.order</field>
+        <field name="arch" type="xml">
+            <search string="Đơn hàng theo KOL">
+                <field name="name"/>
+                <field name="kol_influencer_id"/>
+                <field name="shop_id"/>
+                <field name="platform"/>
+                <field name="campaign_id"/>
+                <filter name="f_shopee" string="Shopee" domain="[('platform','=','shopee')]"/>
+                <filter name="f_tiktok" string="TikTok Shop" domain="[('platform','=','tiktok')]"/>
+                <separator/>
+                <filter name="f_attributed" string="Đã gắn KOL" domain="[('kol_account_id','!=',False)]"/>
+                <filter name="f_unattributed" string="Chưa gắn KOL" domain="[('kol_account_id','=',False)]"/>
+                <separator/>
+                <filter name="f_has_campaign" string="Có chiến dịch" domain="[('campaign_id','!=',False)]"/>
+                <filter name="f_no_campaign" string="Chưa gắn chiến dịch" domain="[('campaign_id','=',False)]"/>
+                <separator/>
+                <filter name="f_confirmed" string="Hoàn tất" domain="[('state','=','confirmed')]"/>
+                <filter name="f_cancel_return" string="Huỷ/Hoàn" domain="[('state','in',('cancelled','returned','partial'))]"/>
+                <separator/>
+                <filter name="filter_order_date" string="Ngày đặt" date="order_date"/>
+                <filter name="f_this_month" string="Tháng này" domain="[('order_date','&gt;=', time.strftime('%Y-%m-01'))]"/>
+                <filter name="f_this_year" string="Năm nay" domain="[('order_date','&gt;=', time.strftime('%Y-01-01'))]"/>
+                <group name="group_by">
+                    <filter name="gb_kol" string="KOL" context="{'group_by':'kol_influencer_id'}"/>
+                    <filter name="gb_campaign" string="Chiến dịch" context="{'group_by':'campaign_id'}"/>
+                    <filter name="gb_platform" string="Nền tảng" context="{'group_by':'platform'}"/>
+                    <filter name="gb_shop" string="Shop" context="{'group_by':'shop_id'}"/>
+                    <filter name="gb_state" string="Trạng thái" context="{'group_by':'state'}"/>
+                    <filter name="gb_month" string="Tháng đặt" context="{'group_by':'order_date:month'}"/>
+                    <filter name="gb_quarter" string="Quý" context="{'group_by':'order_date:quarter'}"/>
+                    <filter name="gb_year" string="Năm" context="{'group_by':'order_date:year'}"/>
+                </group>
+                <searchpanel>
+                    <field name="platform" icon="fa-shopping-bag" enable_counters="1"/>
+                    <field name="shop_id" icon="fa-store" enable_counters="1"/>
+                    <field name="state" select="multi" icon="fa-flag" enable_counters="1"/>
+                    <field name="kol_influencer_id" select="multi" icon="fa-user" enable_counters="1"/>
+                    <field name="campaign_id" select="multi" icon="fa-bullhorn" enable_counters="1"/>
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============ kol.order: list / form / pivot / graph ============ -->
+    <record id="view_kol_order_list" model="ir.ui.view">
+        <field name="name">kol.order.list</field>
+        <field name="model">kol.order</field>
+        <field name="arch" type="xml">
+            <list string="Đơn hàng">
+                <field name="name"/>
+                <field name="order_date"/>
+                <field name="platform"/>
+                <field name="shop_id"/>
+                <field name="kol_influencer_id"/>
+                <field name="kol_account_id" optional="show"/>
+                <field name="campaign_id" optional="show"/>
+                <field name="is_attributed" optional="hide"/>
+                <field name="state"/>
+                <field name="units_gross" optional="hide" sum="SL phát sinh"/>
+                <field name="units_net" optional="hide" sum="SL thực"/>
+                <field name="amount_gross" sum="Gross"/>
+                <field name="amount_net" sum="Net"/>
+                <field name="commission" optional="show" sum="Hoa hồng"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_kol_order_form" model="ir.ui.view">
+        <field name="name">kol.order.form</field>
+        <field name="model">kol.order</field>
+        <field name="arch" type="xml">
+            <form string="Đơn hàng">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="confirmed,partial,returned,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Mã đơn"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="platform"/>
+                            <field name="shop_id"/>
+                            <field name="order_date"/>
+                        </group>
+                        <group>
+                            <field name="kol_account_id"/>
+                            <field name="kol_influencer_id"/>
+                            <field name="is_attributed"/>
+                            <field name="commission_rate"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Dòng sản phẩm">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="qty"/>
+                                    <field name="qty_returned"/>
+                                    <field name="unit_price"/>
+                                    <field name="qty_net"/>
+                                    <field name="amount_gross" sum="Gross"/>
+                                    <field name="amount_net" sum="Net"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                    <group class="oe_subtotal_footer">
+                        <field name="units_gross"/>
+                        <field name="units_net"/>
+                        <field name="amount_gross"/>
+                        <field name="amount_net"/>
+                        <field name="commission"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_kol_order_pivot" model="ir.ui.view">
+        <field name="name">kol.order.pivot</field>
+        <field name="model">kol.order</field>
+        <field name="arch" type="xml">
+            <pivot string="Hiệu quả KOL" sample="1">
+                <field name="kol_influencer_id" type="row"/>
+                <field name="platform" type="col"/>
+                <field name="amount_net" type="measure"/>
+                <field name="amount_gross" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_kol_order_graph" model="ir.ui.view">
+        <field name="name">kol.order.graph</field>
+        <field name="model">kol.order</field>
+        <field name="arch" type="xml">
+            <graph string="Doanh số" type="bar" sample="1">
+                <field name="kol_influencer_id"/>
+                <field name="amount_net" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ============ kol.order.line: pivot / graph / list (theo sản phẩm) ============ -->
+    <record id="view_kol_line_pivot" model="ir.ui.view">
+        <field name="name">kol.order.line.pivot</field>
+        <field name="model">kol.order.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Theo sản phẩm" sample="1">
+                <field name="product_id" type="row"/>
+                <field name="platform" type="col"/>
+                <field name="amount_net" type="measure"/>
+                <field name="qty_net" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_kol_line_graph" model="ir.ui.view">
+        <field name="name">kol.order.line.graph</field>
+        <field name="model">kol.order.line</field>
+        <field name="arch" type="xml">
+            <graph string="Theo sản phẩm" type="bar" sample="1">
+                <field name="product_id"/>
+                <field name="amount_net" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_kol_line_list" model="ir.ui.view">
+        <field name="name">kol.order.line.list</field>
+        <field name="model">kol.order.line</field>
+        <field name="arch" type="xml">
+            <list string="Dòng sản phẩm">
+                <field name="order_id"/>
+                <field name="order_date"/>
+                <field name="platform"/>
+                <field name="kol_influencer_id"/>
+                <field name="product_id"/>
+                <field name="qty" sum="SL"/>
+                <field name="qty_net" sum="SL thực"/>
+                <field name="amount_gross" sum="Gross"/>
+                <field name="amount_net" sum="Net"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_kol_line_search" model="ir.ui.view">
+        <field name="name">kol.order.line.search</field>
+        <field name="model">kol.order.line</field>
+        <field name="arch" type="xml">
+            <search string="Dòng sản phẩm">
+                <field name="product_id"/>
+                <field name="kol_influencer_id"/>
+                <field name="platform"/>
+                <filter name="f_shopee" string="Shopee" domain="[('platform','=','shopee')]"/>
+                <filter name="f_tiktok" string="TikTok Shop" domain="[('platform','=','tiktok')]"/>
+                <group name="group_by">
+                    <filter name="gb_product" string="Sản phẩm" context="{'group_by':'product_id'}"/>
+                    <filter name="gb_kol" string="KOL" context="{'group_by':'kol_influencer_id'}"/>
+                    <filter name="gb_platform" string="Nền tảng" context="{'group_by':'platform'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============ Danh mục nền (influencer / account / product / shop / sync) ============ -->
+    <record id="view_kol_influencer_list" model="ir.ui.view">
+        <field name="name">kol.influencer.list</field>
+        <field name="model">kol.influencer</field>
+        <field name="arch" type="xml">
+            <list string="KOL">
+                <field name="name"/>
+                <field name="account_count"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_kol_influencer_form" model="ir.ui.view">
+        <field name="name">kol.influencer.form</field>
+        <field name="model">kol.influencer</field>
+        <field name="arch" type="xml">
+            <form string="KOL">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Tên KOL"/></h1>
+                    </div>
+                    <field name="note" placeholder="Ghi chú..."/>
+                    <notebook>
+                        <page string="Tài khoản trên các sàn">
+                            <field name="account_ids">
+                                <list editable="bottom">
+                                    <field name="platform"/>
+                                    <field name="handle"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_kol_account_list" model="ir.ui.view">
+        <field name="name">kol.account.list</field>
+        <field name="model">kol.account</field>
+        <field name="arch" type="xml">
+            <list string="Tài khoản sàn" editable="bottom">
+                <field name="influencer_id"/>
+                <field name="platform"/>
+                <field name="handle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_kol_product_list" model="ir.ui.view">
+        <field name="name">kol.product.list</field>
+        <field name="model">kol.product</field>
+        <field name="arch" type="xml">
+            <list string="Sản phẩm" editable="bottom">
+                <field name="sku"/>
+                <field name="name"/>
+                <field name="category"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_kol_shop_list" model="ir.ui.view">
+        <field name="name">kol.shop.list</field>
+        <field name="model">kol.shop</field>
+        <field name="arch" type="xml">
+            <list string="Shop" editable="bottom">
+                <field name="platform"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_kol_sync_list" model="ir.ui.view">
+        <field name="name">kol.sync.status.list</field>
+        <field name="model">kol.sync.status</field>
+        <field name="arch" type="xml">
+            <list string="Cập nhật dữ liệu" decoration-success="state == 'ok'" decoration-warning="state == 'stale'" decoration-danger="state == 'error'">
+                <field name="name"/>
+                <field name="platform"/>
+                <field name="shop_id"/>
+                <field name="last_success"/>
+                <field name="state" widget="badge"/>
+                <field name="message"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============ Actions ============ -->
+    <record id="action_kol_dashboard" model="ir.actions.client">
+        <field name="name">Bảng điều khiển</field>
+        <field name="tag">bsd_kol_report.dashboard</field>
+    </record>
+
+    <record id="action_kol_overview" model="ir.actions.act_window">
+        <field name="name">Tổng quan</field>
+        <field name="res_model">kol.order</field>
+        <field name="view_mode">graph,pivot,list,form</field>
+        <field name="search_view_id" ref="view_kol_order_search"/>
+    </record>
+
+    <record id="action_kol_ranking" model="ir.actions.act_window">
+        <field name="name">Hiệu quả KOL</field>
+        <field name="res_model">kol.order</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+        <field name="search_view_id" ref="view_kol_order_search"/>
+        <field name="context">{'search_default_gb_kol': 1}</field>
+    </record>
+
+    <record id="action_kol_by_product" model="ir.actions.act_window">
+        <field name="name">Theo sản phẩm</field>
+        <field name="res_model">kol.order.line</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_kol_line_search"/>
+        <field name="context">{'search_default_gb_product': 1}</field>
+    </record>
+
+    <record id="action_kol_order" model="ir.actions.act_window">
+        <field name="name">Đơn hàng</field>
+        <field name="res_model">kol.order</field>
+        <field name="view_mode">list,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_kol_order_search"/>
+    </record>
+
+    <record id="action_kol_influencer" model="ir.actions.act_window">
+        <field name="name">KOL</field>
+        <field name="res_model">kol.influencer</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_kol_account" model="ir.actions.act_window">
+        <field name="name">Tài khoản sàn</field>
+        <field name="res_model">kol.account</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_kol_product" model="ir.actions.act_window">
+        <field name="name">Sản phẩm</field>
+        <field name="res_model">kol.product</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_kol_shop" model="ir.actions.act_window">
+        <field name="name">Shop</field>
+        <field name="res_model">kol.shop</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_kol_sync" model="ir.actions.act_window">
+        <field name="name">Cập nhật dữ liệu</field>
+        <field name="res_model">kol.sync.status</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ============ Menus ============ -->
+    <menuitem id="menu_kol_root" name="KOL Report" sequence="20" groups="bsd_kol_report.group_kol_viewer"/>
+
+    <menuitem id="menu_kol_reports" name="Báo cáo" parent="menu_kol_root" sequence="10"/>
+    <menuitem id="menu_kol_dashboard" name="Bảng điều khiển" parent="menu_kol_reports" action="action_kol_dashboard" sequence="5"/>
+    <menuitem id="menu_kol_overview" name="Tổng quan" parent="menu_kol_reports" action="action_kol_overview" sequence="10"/>
+    <menuitem id="menu_kol_ranking" name="Hiệu quả KOL" parent="menu_kol_reports" action="action_kol_ranking" sequence="20"/>
+    <menuitem id="menu_kol_by_product" name="Theo sản phẩm" parent="menu_kol_reports" action="action_kol_by_product" sequence="30"/>
+
+    <menuitem id="menu_kol_data" name="Dữ liệu" parent="menu_kol_root" sequence="20"/>
+    <menuitem id="menu_kol_order" name="Đơn hàng" parent="menu_kol_data" action="action_kol_order" sequence="10"/>
+    <menuitem id="menu_kol_influencer" name="KOL" parent="menu_kol_data" action="action_kol_influencer" sequence="20"/>
+    <menuitem id="menu_kol_account" name="Tài khoản sàn" parent="menu_kol_data" action="action_kol_account" sequence="30"/>
+    <menuitem id="menu_kol_product" name="Sản phẩm" parent="menu_kol_data" action="action_kol_product" sequence="40"/>
+    <menuitem id="menu_kol_shop" name="Shop" parent="menu_kol_data" action="action_kol_shop" sequence="50"/>
+
+    <menuitem id="menu_kol_sync" name="Cập nhật dữ liệu" parent="menu_kol_root" action="action_kol_sync" sequence="30"/>
+
+    <!-- ============ kol.connection: cấu hình kết nối nguồn ============ -->
+    <record id="view_kol_connection_list" model="ir.ui.view">
+        <field name="name">kol.connection.list</field>
+        <field name="model">kol.connection</field>
+        <field name="arch" type="xml">
+            <list string="Kết nối nguồn dữ liệu" decoration-success="state == 'connected'" decoration-muted="mode == 'sample'">
+                <field name="platform"/>
+                <field name="shop_id"/>
+                <field name="source_type"/>
+                <field name="mode"/>
+                <field name="state" widget="badge"/>
+                <field name="last_sync"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_kol_connection_form" model="ir.ui.view">
+        <field name="name">kol.connection.form</field>
+        <field name="model">kol.connection</field>
+        <field name="arch" type="xml">
+            <form string="Kết nối nguồn dữ liệu">
+                <header>
+                    <button name="action_test_connection" type="object" string="Kiểm tra kết nối" class="btn-primary"/>
+                    <button name="action_sync_now" type="object" string="Đồng bộ ngay"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,configured,connected"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-info" role="alert" invisible="mode != 'sample'">
+                        <strong>Chế độ dữ liệu mẫu (demo).</strong> Báo cáo đang dùng dữ liệu mẫu.
+                        Khi chạy thật: điền tham số tài khoản bên dưới rồi chuyển <em>Chế độ = Chạy thật</em>.
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="mode != 'live' or state == 'connected'">
+                        <strong>Chạy thật.</strong> Cần nhập đủ tham số tài khoản rồi bấm <em>Kiểm tra kết nối</em>.
+                    </div>
+                    <group>
+                        <group>
+                            <field name="platform"/>
+                            <field name="shop_id"/>
+                            <field name="source_type"/>
+                            <field name="region"/>
+                        </group>
+                        <group>
+                            <field name="mode"/>
+                            <field name="history_days"/>
+                            <field name="base_url" placeholder="vd: https://partner.shopeemobile.com"/>
+                        </group>
+                    </group>
+
+                    <group string="Tham số Shopee Open API" invisible="platform != 'shopee' or source_type != 'api'">
+                        <field name="shopee_partner_id" placeholder="Partner ID từ Shopee Open Platform"/>
+                        <field name="shopee_partner_key" password="True"/>
+                        <field name="shopee_shop_id"/>
+                        <field name="shopee_access_token" password="True"/>
+                        <field name="shopee_refresh_token" password="True"/>
+                    </group>
+
+                    <group string="Tham số TikTok Shop Partner API" invisible="platform != 'tiktok' or source_type != 'api'">
+                        <field name="tiktok_app_key" placeholder="App Key từ Partner Center"/>
+                        <field name="tiktok_app_secret" password="True"/>
+                        <field name="tiktok_shop_cipher"/>
+                        <field name="tiktok_service_id"/>
+                        <field name="tiktok_access_token" password="True"/>
+                        <field name="tiktok_refresh_token" password="True"/>
+                        <field name="tiktok_affiliate_enabled"/>
+                    </group>
+
+                    <group string="Tham số Lazada Open Platform" invisible="platform != 'lazada' or source_type != 'api'">
+                        <field name="lazada_app_key" placeholder="App Key từ Lazada Open Platform"/>
+                        <field name="lazada_app_secret" password="True"/>
+                        <field name="lazada_seller_id"/>
+                        <field name="lazada_access_token" password="True"/>
+                        <field name="lazada_refresh_token" password="True"/>
+                    </group>
+
+                    <group string="Tham số Quảng cáo (Ads) — chi phí &amp; ROAS" invisible="source_type != 'api'">
+                        <field name="ads_enabled"/>
+                        <field name="shopee_ads_shop_id" invisible="platform != 'shopee'" placeholder="Shop ID cho Shopee Ads"/>
+                        <field name="tiktok_ads_advertiser_id" invisible="platform != 'tiktok'" placeholder="Advertiser ID (TikTok Ads/GMV Max)"/>
+                        <field name="lazada_ads_account_id" invisible="platform != 'lazada'" placeholder="Account ID (Lazada Sponsored Solutions)"/>
+                        <div colspan="2" class="text-muted">
+                            Lấy chi phí quảng cáo, lượt hiển thị/nhấp và doanh thu quy từ quảng cáo để tính <strong>ROAS</strong>.
+                            Shopee Ads &amp; TikTok Ads (GMV Max) &amp; Lazada Sponsored đều có API báo cáo hiệu suất.
+                        </div>
+                    </group>
+
+                    <group string="Nhập file (khi chưa có API)" invisible="source_type != 'file'">
+                        <div colspan="2" class="text-muted">
+                            Với nguồn <strong>Nhập file</strong>: tải báo cáo export từ Seller Centre / AMS theo mẫu,
+                            hệ thống đọc file theo lịch. Áp dụng khi nền tảng chưa cấp API attribution — điển hình là Shopee.
+                        </div>
+                    </group>
+
+                    <group string="Lịch đồng bộ (Schedule)">
+                        <field name="sync_active"/>
+                        <field name="sync_interval"/>
+                        <field name="sync_hour" widget="float_time" invisible="sync_interval != 'daily'"/>
+                        <field name="next_sync" readonly="1"/>
+                    </group>
+
+                    <group string="Trạng thái">
+                        <field name="last_test" readonly="1"/>
+                        <field name="last_test_message" readonly="1"/>
+                        <field name="last_sync" readonly="1"/>
+                    </group>
+
+                    <separator string="Điều kiện kết nối thật"/>
+                    <div class="text-muted">
+                        <ul>
+                            <li><strong>TikTok Shop:</strong> đăng ký app ở Partner Center, xin duyệt <em>Affiliate Seller API</em> (mặc định tắt), shop đã bật chương trình Affiliate.</li>
+                            <li><strong>Shopee:</strong> app Open Platform; dữ liệu gắn KOL thường lấy từ dashboard AMS (export file) vì Open API không trả attribution theo đơn.</li>
+                            <li><strong>Lazada:</strong> app Lazada Open Platform (gateway theo quốc gia, vd api.lazada.vn); gắn KOL qua Lazada Affiliate — xác minh khả năng lấy theo đơn khi khảo sát.</li>
+                            <li>Tài khoản &amp; quyền do <strong>khách hàng</strong> cung cấp và uỷ quyền (OAuth).</li>
+                        </ul>
+                    </div>
+                    <field name="note" placeholder="Ghi chú..."/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_kol_connection" model="ir.actions.act_window">
+        <field name="name">Kết nối nguồn dữ liệu</field>
+        <field name="res_model">kol.connection</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_kol_config" name="Cấu hình" parent="menu_kol_root" sequence="40" groups="bsd_kol_report.group_kol_manager"/>
+    <menuitem id="menu_kol_connection" name="Kết nối nguồn dữ liệu" parent="menu_kol_config" action="action_kol_connection" sequence="10"/>
+
+    <!-- ============ kol.campaign: đẩy chiến dịch lên sàn ============ -->
+    <record id="view_kol_campaign_search" model="ir.ui.view">
+        <field name="name">kol.campaign.search</field>
+        <field name="model">kol.campaign</field>
+        <field name="arch" type="xml">
+            <search string="Chiến dịch">
+                <field name="name"/>
+                <field name="platform"/>
+                <field name="campaign_type"/>
+                <filter name="f_affiliate" string="Affiliate" domain="[('campaign_type','in',('affiliate_open','affiliate_target'))]"/>
+                <filter name="f_promo" string="Khuyến mãi" domain="[('campaign_type','in',('promo_discount','promo_voucher'))]"/>
+                <separator/>
+                <filter name="f_draft" string="Nháp" domain="[('state','=','draft')]"/>
+                <filter name="f_pushed" string="Đã đẩy" domain="[('state','=','pushed')]"/>
+                <group name="group_by">
+                    <filter name="gb_platform" string="Sàn" context="{'group_by':'platform'}"/>
+                    <filter name="gb_type" string="Loại" context="{'group_by':'campaign_type'}"/>
+                    <filter name="gb_state" string="Trạng thái" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_kol_campaign_list" model="ir.ui.view">
+        <field name="name">kol.campaign.list</field>
+        <field name="model">kol.campaign</field>
+        <field name="arch" type="xml">
+            <list string="Chiến dịch" decoration-info="state == 'pushed'" decoration-success="state == 'active'" decoration-muted="state == 'closed'">
+                <field name="name"/>
+                <field name="campaign_type"/>
+                <field name="platform"/>
+                <field name="shop_id" optional="show"/>
+                <field name="date_start" optional="show"/>
+                <field name="date_end" optional="hide"/>
+                <field name="push_channel" optional="show"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_kol_campaign_form" model="ir.ui.view">
+        <field name="name">kol.campaign.form</field>
+        <field name="model">kol.campaign</field>
+        <field name="arch" type="xml">
+            <form string="Chiến dịch">
+                <header>
+                    <button name="action_push" type="object" string="Đẩy lên sàn" class="btn-primary"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,pushed,active,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_orders" type="object" class="oe_stat_button" icon="fa-shopping-cart">
+                            <field name="order_count" widget="statinfo" string="Đơn hàng"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Tên chiến dịch"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="campaign_type"/>
+                            <field name="platform"/>
+                            <field name="shop_id"/>
+                        </group>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                            <field name="commission_rate" invisible="campaign_type not in ('affiliate_open','affiliate_target')"/>
+                            <field name="discount_percent" invisible="campaign_type not in ('promo_discount','promo_voucher')"/>
+                        </group>
+                    </group>
+                    <group string="Cách đẩy lên sàn">
+                        <field name="push_channel" readonly="1"/>
+                        <field name="is_api_push" invisible="1"/>
+                        <field name="last_push" readonly="1"/>
+                        <field name="push_note" readonly="1"/>
+                        <div colspan="2" class="text-muted">
+                            Bản demo: nút "Đẩy lên sàn" KHÔNG gọi API thật. TikTok affiliate &amp; khuyến mãi sản phẩm có API ghi; Shopee affiliate (AMS) &amp; Lazada phải áp thủ công ở Seller Centre.
+                        </div>
+                    </group>
+                    <notebook>
+                        <page string="Sản phẩm">
+                            <field name="product_ids">
+                                <list>
+                                    <field name="sku"/>
+                                    <field name="name"/>
+                                    <field name="category"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="KOL được mời" invisible="campaign_type != 'affiliate_target'">
+                            <field name="kol_account_ids">
+                                <list>
+                                    <field name="influencer_id"/>
+                                    <field name="platform"/>
+                                    <field name="handle"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_kol_campaign" model="ir.actions.act_window">
+        <field name="name">Chiến dịch</field>
+        <field name="res_model">kol.campaign</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_kol_campaign_search"/>
+    </record>
+
+    <menuitem id="menu_kol_campaign" name="Chiến dịch" parent="menu_kol_root" action="action_kol_campaign" sequence="25" groups="bsd_kol_report.group_kol_viewer"/>
+
+</odoo>

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============ kol.ad: search ============ -->
+    <record id="view_kol_ad_search" model="ir.ui.view">
+        <field name="name">kol.ad.search</field>
+        <field name="model">kol.ad</field>
+        <field name="arch" type="xml">
+            <search string="Quảng cáo (Ads)">
+                <field name="name"/>
+                <field name="platform"/>
+                <field name="ad_type"/>
+                <field name="product_id"/>
+                <field name="shop_id"/>
+                <filter name="f_shopee" string="Shopee" domain="[('platform','=','shopee')]"/>
+                <filter name="f_tiktok" string="TikTok Shop" domain="[('platform','=','tiktok')]"/>
+                <filter name="f_lazada" string="Lazada" domain="[('platform','=','lazada')]"/>
+                <separator/>
+                <filter name="filter_date" string="Ngày" date="date"/>
+                <filter name="f_this_month" string="Tháng này" domain="[('date','&gt;=', time.strftime('%Y-%m-01'))]"/>
+                <filter name="f_this_year" string="Năm nay" domain="[('date','&gt;=', time.strftime('%Y-01-01'))]"/>
+                <group name="group_by">
+                    <filter name="gb_platform" string="Nền tảng" context="{'group_by':'platform'}"/>
+                    <filter name="gb_ad_type" string="Loại QC" context="{'group_by':'ad_type'}"/>
+                    <filter name="gb_product" string="Sản phẩm" context="{'group_by':'product_id'}"/>
+                    <filter name="gb_shop" string="Shop" context="{'group_by':'shop_id'}"/>
+                    <filter name="gb_month" string="Tháng" context="{'group_by':'date:month'}"/>
+                    <filter name="gb_quarter" string="Quý" context="{'group_by':'date:quarter'}"/>
+                </group>
+                <searchpanel>
+                    <field name="platform" icon="fa-shopping-bag" enable_counters="1"/>
+                    <field name="ad_type" select="multi" icon="fa-bullhorn" enable_counters="1"/>
+                    <field name="shop_id" select="multi" icon="fa-store" enable_counters="1"/>
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============ kol.ad: list ============ -->
+    <record id="view_kol_ad_list" model="ir.ui.view">
+        <field name="name">kol.ad.list</field>
+        <field name="model">kol.ad</field>
+        <field name="arch" type="xml">
+            <list string="Quảng cáo (Ads)" decoration-success="roas &gt;= 3" decoration-danger="roas &lt; 1.5">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="platform"/>
+                <field name="ad_type"/>
+                <field name="product_id" optional="show"/>
+                <field name="impressions" optional="hide" sum="Hiển thị"/>
+                <field name="clicks" optional="hide" sum="Nhấp"/>
+                <field name="orders" optional="show" sum="Đơn"/>
+                <field name="cost" sum="Chi phí"/>
+                <field name="revenue" sum="Doanh thu QC"/>
+                <field name="roas" widget="float" digits="[16,2]"/>
+                <field name="acos" optional="hide"/>
+                <field name="ctr" optional="hide"/>
+                <field name="cpc" optional="hide"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============ kol.ad: form ============ -->
+    <record id="view_kol_ad_form" model="ir.ui.view">
+        <field name="name">kol.ad.form</field>
+        <field name="model">kol.ad</field>
+        <field name="arch" type="xml">
+            <form string="Quảng cáo (Ads)">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Tên chiến dịch quảng cáo"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="platform"/>
+                            <field name="shop_id"/>
+                            <field name="ad_type"/>
+                            <field name="product_id"/>
+                            <field name="date"/>
+                        </group>
+                        <group>
+                            <field name="cost"/>
+                            <field name="revenue"/>
+                            <field name="roas" widget="float" digits="[16,2]"/>
+                            <field name="acos"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group string="Chỉ số tương tác">
+                        <group>
+                            <field name="impressions"/>
+                            <field name="clicks"/>
+                            <field name="orders"/>
+                        </group>
+                        <group>
+                            <field name="ctr"/>
+                            <field name="cpc"/>
+                            <field name="cvr"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============ kol.ad: pivot / graph ============ -->
+    <record id="view_kol_ad_pivot" model="ir.ui.view">
+        <field name="name">kol.ad.pivot</field>
+        <field name="model">kol.ad</field>
+        <field name="arch" type="xml">
+            <pivot string="Chi phí &amp; doanh thu QC" sample="1">
+                <field name="product_id" type="row"/>
+                <field name="platform" type="col"/>
+                <field name="cost" type="measure"/>
+                <field name="revenue" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_kol_ad_graph" model="ir.ui.view">
+        <field name="name">kol.ad.graph</field>
+        <field name="model">kol.ad</field>
+        <field name="arch" type="xml">
+            <graph string="Quảng cáo theo sàn" type="bar" sample="1">
+                <field name="platform"/>
+                <field name="cost" type="measure"/>
+                <field name="revenue" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_kol_ads" model="ir.actions.act_window">
+        <field name="name">Quảng cáo &amp; ROAS</field>
+        <field name="res_model">kol.ad</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+        <field name="search_view_id" ref="view_kol_ad_search"/>
+        <field name="context">{'search_default_gb_platform': 1}</field>
+    </record>
+
+    <menuitem id="menu_kol_ads" name="Quảng cáo &amp; ROAS"
+              parent="menu_kol_reports" action="action_kol_ads" sequence="40"/>
+
+</odoo>
